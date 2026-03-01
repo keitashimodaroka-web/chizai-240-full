@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>知財2級 学科 過去3年全問</title>
+    <style>
+        body { font-family: sans-serif; background: #f0f4f8; padding: 20px; max-width: 850px; margin: 0 auto; line-height: 1.8; color: #333; }
+        .header { background: #003366; color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center; }
+        .progress-bar { position: sticky; top: 0; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 25px; text-align: center; z-index: 1000; font-weight: bold; border: 2px solid #003366; }
+        .card { background: white; padding: 25px; border-radius: 15px; margin-bottom: 40px; border: 1px solid #e0e0e0; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .q-num { background: #003366; color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.85em; margin-bottom: 15px; display: inline-block; }
+        .q-text { font-weight: bold; font-size: 1.1em; margin-bottom: 20px; }
+        .choice-list { display: grid; gap: 10px; }
+        .btn { text-align: left; padding: 15px; border: 2px solid #eaecf0; border-radius: 8px; background: #fff; cursor: pointer; font-size: 15px; transition: 0.2s; }
+        .btn:hover { background: #f0f7ff; border-color: #003366; }
+        .correct { background: #e6f4ea !important; border-color: #1e8e3e !important; color: #1e8e3e !important; font-weight: bold; }
+        .incorrect { background: #fce8e6 !important; border-color: #d93025 !important; color: #d93025 !important; }
+        .exp { display: none; padding: 15px; background: #f8f9fa; margin-top: 15px; border-radius: 10px; border-left: 6px solid #003366; }
+    </style>
+</head>
+<body>
+    <div class="header"><h1>知財技能検定2級 学科</h1><p>過去3年分 原文演習</p></div>
+    <div class="progress-bar" id="status">データを読み込み中...</div>
+    <div id="quiz-area"></div>
+
+    <script src="data.js"></script>
+
+    <script>
+        const area = document.getElementById('quiz-area');
+        const status = document.getElementById('status');
+        let count = 0; let correctNum = 0;
+
+        function build() {
+            if (typeof quizData === 'undefined') {
+                status.innerText = "データが見つかりません。data.jsを作成してください。";
+                return;
+            }
+            quizData.forEach((d, i) => {
+                const card = document.createElement('div');
+                card.className = 'card'; card.id = 'card-' + i;
+                card.innerHTML = `<div class="q-num">第 ${i+1} 問</div><div class="q-text">${d.q}</div><div class="choice-list">${d.choices.map((c, ci) => `<button class="btn" onclick="check(${i}, ${ci})">${c}</button>`).join('')}</div><div id="exp-${i}" class="exp"><strong>【解説】</strong><br>${d.exp}</div>`;
+                area.appendChild(card);
+            });
+            status.innerText = `演習開始 (0 / ${quizData.length} 完了)`;
+        }
+
+        function check(qi, ci) {
+            const d = quizData[qi]; const exp = document.getElementById('exp-' + qi);
+            if (exp.style.display === 'block') return;
+            const buttons = document.querySelectorAll('#card-' + qi + ' .btn');
+            if (ci === d.ans) { buttons[ci].classList.add('correct'); correctNum++; }
+            else { buttons[ci].classList.add('incorrect'); buttons[d.ans].classList.add('correct'); }
+            exp.style.display = 'block'; count++;
+            status.innerText = `完了: ${count} / ${quizData.length} (正答率: ${Math.round(correctNum/count*100)}%)`;
+            setTimeout(() => {
+                const next = document.getElementById('card-' + (qi + 1));
+                if (next) next.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 800);
+        }
+        // データ読み込みを待って実行
+        window.onload = build;
+    </script>
+</body>
+</html>
